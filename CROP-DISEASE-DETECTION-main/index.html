@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-dark: #388E3C;
+            --secondary-color: #8BC34A;
+            --text-color: #333;
+            --light-gray: #f8f9fa;
+            --gray: #6c757d;
+            --white: #ffffff;
+            --border-radius: 10px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background-color: var(--white);
+            box-shadow: var(--box-shadow);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .navbar-brand i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 4rem 0;
+            margin-bottom: 2rem;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://via.placeholder.com/1200x800') center/cover no-repeat;
+            opacity: 0.1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content h1 {
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .hero-content p {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .upload-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .upload-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .upload-header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .upload-header h3 {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .upload-body {
+            padding: 2rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary-color);
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .upload-area p {
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            border-radius: 50px;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            border-radius: 50px;
+            transition: var(--transition);
+        }
+
+        .btn-outline-primary:hover, .btn-outline-primary:focus {
+            background-color: var(--primary-color);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        #preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: var(--border-radius);
+            margin-top: 1.5rem;
+            display: none;
+            box-shadow: var(--box-shadow);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .loading .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: var(--primary-color);
+        }
+
+        .result-card {
+            display: none;
+            margin-top: 2rem;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .result-header h4 {
+            margin-bottom: 0;
+            font-weight: 600;
+        }
+
+        .result-body {
+            padding: 2rem;
+            background-color: var(--white);
+        }
+
+        .result-title {
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .confidence-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar {
+            background-color: var(--primary-color);
+            border-radius: 5px;
+            transition: width 1s ease;
+        }
+
+        .disease-info {
+            background-color: rgba(76, 175, 80, 0.05);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            margin-top: 1rem;
+        }
+
+        .features-section {
+            padding: 3rem 0;
+            background-color: var(--white);
+        }
+
+        .feature-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--box-shadow);
+            height: 100%;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            padding: 1rem;
+            border-radius: 50%;
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+
+        .footer {
+            background-color: var(--primary-dark);
+            color: var(--white);
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .footer a {
+            color: var(--white);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        /* Add these styles to your existing style section */
+        #Map {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+#Map h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+#googleMap {
+    width: 100%;
+    height: 400px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.disease-scroller-section {
+    overflow: hidden;
+    background-color: #f0f7f0;
+    position: relative;
+}
+
+.scroller-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.scroller-content {
+    display: flex;
+    padding: 10px 0;
+    /* Animation is set dynamically in JS for more accurate timing */
+}
+
+.disease-item {
+    flex: 0 0 auto;
+    width: 180px;
+    margin: 0 15px;
+    cursor: pointer;
+    transition: transform 0.3s;
+    text-align: center;
+}
+
+.disease-item:hover {
+    transform: translateY(-5px);
+}
+
+.disease-img-container {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: white;
+}
+
+.disease-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.disease-item:hover .disease-img {
+    transform: scale(1.05);
+}
+
+.disease-name {
+    margin-top: 10px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+/* Modal styling */
+.modal-content {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.remedy-item {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.remedy-item:last-child {
+    border-bottom: none;
+}
+
+.remedy-title {
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-bottom: 5px;
+}
+
+        .footer a:hover {
+            color: var(--secondary-color);
+        }
+
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 3rem 0;
+            }
+
+            .upload-body {
+                padding: 1.5rem;
+            }
+
+            .feature-card {
+                margin-bottom: 1.5rem;
+            }
+        }
+        .forum-container {
+            display: flex;
+            width: 80%;
+            margin: 20px auto;
+            gap: 20px;
+        }
+        .forum-left-panel, .forum-right-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .forum-left-panel {
+            flex: 1;
+        }
+        .forum-right-panel {
+            flex: 2;
+            overflow-y: auto;
+            max-height: 500px;
+        }
+        h2, h3 {
+            text-align: center;
+        }
+        .forum-input, .forum-textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .forum-button {
+            padding: 10px;
+            width: 100%;
+            background: #28a745;
+            color: white;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .forum-button:hover {
+            background: #218838;
+        }
+        .forum-discussion {
+            background: #f9f9f9;
+            padding: 10px;
+            margin-top: 10px;
+            border-left: 5px solid #28a745;
+            border-radius: 5px;
+            position: relative;
+        }
+        .forum-discussion strong {
+            color: #333;
+        }
+        .forum-delete-btn, .forum-reply-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: rgb(26, 25, 25);
+            color: white;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        .forum-reply-btn {
+            background: rgb(32, 176, 63);
+            right: 50px;
+        }
+        .forum-delete-btn:hover {
+            background: darkred;
+        }
+        .forum-reply-btn:hover {
+            background: darkblue;
+        }
+        .forum-replies {
+            margin-top: 10px;
+            margin-left: 20px;
+            padding-left: 10px;
+            border-left: 3px solid #ccc;
+        }
+        .forum-reply-form {
+            margin-top: 10px;
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-leaf"></i> VRUKSH</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Features</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center hero-content">
+            <h1>Plant Disease Detection</h1>
+            <p>Upload a plant leaf image and our AI will instantly identify diseases to help you take appropriate action.</p>
+            <a href="#upload-section" class="btn btn-light btn-lg">Get Started <i class="fas fa-arrow-right ms-2"></i></a>
+        </div>
+    </section>
+<!-- Disease Scroller Section - Add this after the hero section and before the upload section -->
+<section class="disease-scroller-section py-4">
+    <div class="container mb-3">
+        <h3 class="text-center mb-3">Common Plant Diseases</h3>
+        <p class="text-center">Click on any disease to view treatment remedies</p>
+    </div>
+    <div class="scroller-container">
+        <div class="scroller-content">
+            <!-- Disease items will be duplicated in JS for infinite effect -->
+            <div class="disease-item" data-disease="Late Blight">
+                <div class="disease-img-container">
+                    <img src="https://i.postimg.cc/tJySNbQx/late-blight.jpg" alt="Late Blight" class="disease-img">
+                </div>
+                <p class="disease-name">Late Blight</p>
+            </div>
+            <div class="disease-item" data-disease="Powdery Mildew">
+                <div class="disease-img-container">
+                    <img src="https://i.postimg.cc/c1M54vwM/powdery.jpg" alt="Powdery Mildew" class="disease-img">
+                </div>
+                <p class="disease-name">Powdery Mildew</p>
+            </div>
+            <div class="disease-item" data-disease="Apple Scab">
+                <div class="disease-img-container">
+                    <img src="data:image/jpeg;base64,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" alt="Apple Scab" class="disease-img">
+                </div>
+                <p class="disease-name">Apple Scab</p>
+            </div>
+            <div class="disease-item" data-disease="Black Spot">
+                <div class="disease-img-container">
+                    <img src="https://i.postimg.cc/q7h5kQxz/cearcospora-leaf-spot.jpg" alt="Black Spot" class="disease-img">
+                </div>
+                <p class="disease-name">Black Spot</p>
+            </div>
+            <div class="disease-item" data-disease="Leaf Rust">
+                <div class="disease-img-container">
+                    <img src="https://i.postimg.cc/7YKs0jB5/rust.jpg" alt="Leaf Rust" class="disease-img">
+                </div>
+                <p class="disease-name">Leaf Rust</p>
+            </div>
+            <div class="disease-item" data-disease="Bacterial Blight">
+                <div class="disease-img-container">
+                    <img src="https://i.postimg.cc/NfDVbK0f/bacterial-leaf-blight.jpg" alt="Bacterial Blight" class="disease-img">
+                </div>
+                <p class="disease-name">Bacterial Blight</p>
+            </div>
+            <div class="disease-item" data-disease="Downy Mildew">
+                <div class="disease-img-container">
+                    <img src="https://i.postimg.cc/g2077Gwy/downy-mildew.jpg" alt="Downy Mildew" class="disease-img">
+                </div>
+                <p class="disease-name">Downy Mildew</p>
+            </div>
+            <div class="disease-item" data-disease="Anthracnose">
+                <div class="disease-img-container">
+                    <img src="https://i.postimg.cc/tJ0YnD1j/anthracnose-1.jpg" alt="Anthracnose" class="disease-img">
+                </div>
+                <p class="disease-name">Anthracnose</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Remedy Modal - Add this before the closing body tag -->
+<div class="modal fade" id="remedyModal" tabindex="-1" aria-labelledby="remedyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: var(--primary-color); color: white;">
+                <h5 class="modal-title" id="remedyModalLabel">Disease Remedies</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4 id="disease-title" class="mb-3"></h4>
+                <div id="disease-remedies"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- Main Content -->
+    <div class="container" id="upload-section">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <!-- Upload Card -->
+                <div class="upload-card">
+                    <div class="upload-header">
+                        <h3><i class="fas fa-cloud-upload-alt me-2"></i> Upload Plant Leaf Image</h3>
+                        <p class="mb-0">Get instant disease diagnosis with our AI technology</p>
+                    </div>
+                    <div class="upload-body">
+                        <form id="upload-form" enctype="multipart/form-data">
+                            <div id="upload-area" class="upload-area">
+                                <i class="fas fa-image"></i>
+                                <h5>Drag & Drop Image Here</h5>
+                                <p>or</p>
+                                <button type="button" id="browse-button" class="btn btn-outline-primary">Browse Files</button>
+                                <input type="file" id="image-upload" class="file-input" accept="image/*">
+                                <p class="mt-3 small">Supported formats: JPG, PNG, JPEG</p>
+                            </div>
+
+                            <div class="text-center">
+                                <img id="preview-image" src="#" alt="Image preview">
+                                <div id="file-info" class="mt-3" style="display: none;">
+                                    <p class="mb-2"><i class="fas fa-file-image me-2"></i><span id="file-name">image.jpg</span></p>
+                                    <button type="button" id="change-image" class="btn btn-sm btn-outline-primary">Change Image</button>
+                                </div>
+                                <button type="submit" id="detect-button" class="btn btn-primary mt-3" style="display: none;">
+                                    <i class="fas fa-search me-2"></i>Detect Disease
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div class="loading">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Analyzing your plant image...</p>
+                </div>
+
+                <!-- Result Card -->
+                <div class="result-card">
+                    <div class="result-header">
+                        <h4><i class="fas fa-clipboard-check me-2"></i>Detection Result</h4>
+                    </div>
+                    <div class="result-body">
+                        <h5 class="result-title" id="result-title">Plant Disease</h5>
+
+                        <div class="confidence-label">
+                            <span>Confidence Level</span>
+                            <span id="confidence-text">0%</span>
+                        </div>
+                        <div class="progress">
+                            <div id="confidence-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+
+                        <div class="disease-info">
+                            <p id="result-details">Details about the disease and confidence level</p>
+                        </div>
+
+                        <div class="mt-4 text-center">
+                            <button type="button" id="scan-again" class="btn btn-outline-primary">
+                                <i class="fas fa-redo me-2"></i>Scan Another Image
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section class="features-section mt-5" id="features">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>Why Use Vruksh?</h2>
+                <p>Our AI-powered tool helps you identify plant diseases quickly and accurately</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card">
+                        <span class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </span>
+                        <h4 class="feature-title">Fast Detection</h4>
+                        <p>Get disease identification results in seconds, allowing for quick action</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card">
+                        <span class="feature-icon">
+                            <i class="fas fa-brain"></i>
+                        </span>
+                        <h4 class="feature-title">AI Powered</h4>
+                        <p>Utilizes deep learning technology trained on thousands of plant images</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card">
+                        <span class="feature-icon">
+                            <i class="fas fa-seedling"></i>
+                        </span>
+                        <h4 class="feature-title">Multiple Plants</h4>
+                        <p>Supports 14+ plant species and can identify 30+ different diseases</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="Map" class="Map Integration">
+        <h2>Agro Map of India</h2>
+        <div id="googleMap" style="width:100%;height:400px;"></div>
+
+        <script>
+        function myMap() {
+            var mapProp = {
+                center: new google.maps.LatLng(20.5937, 78.9629),
+                zoom: 5,
+            };
+            var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
+        }
+        </script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCNRsoMs1nVZseQCKfzhFoXPs3PFbodWZ0&callback=myMap"></script>
+    </section>
+    <title>Discussion Forum</title>
+    <div class="forum-container">
+        <!-- Left Panel: Input Form -->
+        <div class="forum-left-panel">
+            <h2>Start Discussion</h2>
+            <input type="text" id="forum-name-input" class="forum-input" placeholder="Your Name">
+            <textarea id="forum-message-input" class="forum-textarea" placeholder="Your Message"></textarea>
+            <button class="forum-button" onclick="forumSaveDiscussion()">Submit</button>
+        </div>
+
+        <!-- Right Panel: Discussions -->
+        <div class="forum-right-panel">
+            <h2>Discussions</h2>
+            <div id="forum-discussions"></div>
+        </div>
+    </div>
+
+    <script>
+        function forumSaveDiscussion() {
+            const name = document.getElementById("forum-name-input").value.trim();
+            const message = document.getElementById("forum-message-input").value.trim();
+
+            if (name === "" || message === "") {
+                alert("Please enter both name and message.");
+                return;
+            }
+
+            const discussion = { name, message, replies: [] };
+            let discussions = JSON.parse(localStorage.getItem("forum-discussions")) || [];
+            discussions.push(discussion);
+            localStorage.setItem("forum-discussions", JSON.stringify(discussions));
+
+            document.getElementById("forum-name-input").value = "";
+            document.getElementById("forum-message-input").value = "";
+
+            forumLoadDiscussions();
+        }
+
+        function forumLoadDiscussions() {
+            const discussionDiv = document.getElementById("forum-discussions");
+            discussionDiv.innerHTML = "";
+
+            let discussions = JSON.parse(localStorage.getItem("forum-discussions")) || [];
+            discussions.forEach((d, index) => {
+                let discussionElement = document.createElement("div");
+                discussionElement.className = "forum-discussion";
+
+                discussionElement.innerHTML = `
+                    <p><strong>${d.name}:</strong> ${d.message}</p>
+                    <button class="forum-reply-btn" onclick="forumShowReplyForm(${index})">Reply</button>
+                    <button class="forum-delete-btn" onclick="forumDeleteDiscussion(${index})">X</button>
+                    <div id="forum-reply-form-${index}" class="forum-reply-form">
+                        <input type="text" id="forum-reply-name-${index}" class="forum-input" placeholder="Your Name">
+                        <textarea id="forum-reply-message-${index}" class="forum-textarea" placeholder="Your Reply"></textarea>
+                        <button class="forum-button" onclick="forumSaveReply(${index})">Submit Reply</button>
+                    </div>
+                `;
+
+                // Append Replies
+                let repliesDiv = document.createElement("div");
+                repliesDiv.className = "forum-replies";
+
+                d.replies.forEach((reply) => {
+                    let replyElement = document.createElement("p");
+                    replyElement.innerHTML = `<strong>${reply.name}:</strong> ${reply.message}`;
+                    repliesDiv.appendChild(replyElement);
+                });
+
+                discussionElement.appendChild(repliesDiv);
+                discussionDiv.appendChild(discussionElement);
+            });
+        }
+
+        function forumDeleteDiscussion(index) {
+            let discussions = JSON.parse(localStorage.getItem("forum-discussions")) || [];
+            discussions.splice(index, 1);
+            localStorage.setItem("forum-discussions", JSON.stringify(discussions));
+            forumLoadDiscussions();
+        }
+
+        function forumShowReplyForm(index) {
+            let replyForm = document.getElementById(`forum-reply-form-${index}`);
+            replyForm.style.display = replyForm.style.display === "block" ? "none" : "block";
+        }
+
+        function forumSaveReply(index) {
+            const name = document.getElementById(`forum-reply-name-${index}`).value.trim();
+            const message = document.getElementById(`forum-reply-message-${index}`).value.trim();
+
+            if (name === "" || message === "") {
+                alert("Please enter both name and reply message.");
+                return;
+            }
+
+            let discussions = JSON.parse(localStorage.getItem("forum-discussions")) || [];
+            discussions[index].replies.push({ name, message });
+            localStorage.setItem("forum-discussions", JSON.stringify(discussions));
+
+            forumLoadDiscussions();
+        }
+
+        document.addEventListener("DOMContentLoaded", forumLoadDiscussions);
+    </script>
+</body>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Vruksh - Plant Disease Detection. All rights reserved.</p>
+            <p><a href="/about">About</a> | <a href="#features">Features</a></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('upload-form');
+            const uploadArea = document.getElementById('upload-area');
+            const browseButton = document.getElementById('browse-button');
+            const imageUpload = document.getElementById('image-upload');
+            const previewImage = document.getElementById('preview-image');
+            const fileInfo = document.getElementById('file-info');
+            const fileName = document.getElementById('file-name');
+            const changeImage = document.getElementById('change-image');
+            const detectButton = document.getElementById('detect-button');
+            const resultCard = document.querySelector('.result-card');
+            const resultTitle = document.getElementById('result-title');
+            const resultDetails = document.getElementById('result-details');
+            const confidenceBar = document.getElementById('confidence-bar');
+            const confidenceText = document.getElementById('confidence-text');
+            const loadingIndicator = document.querySelector('.loading');
+            const scanAgain = document.getElementById('scan-again');
+
+            // Drag and drop functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                uploadArea.classList.add('dragover');
+            }
+
+            function unhighlight() {
+                uploadArea.classList.remove('dragover');
+            }
+
+            uploadArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                if (files.length) {
+                    imageUpload.files = files;
+                    handleFiles(files[0]);
+                }
+            }
+            // Add this to your existing script section after the DOMContentLoaded event
+// Inside your existing document.addEventListener('DOMContentLoaded', function() { ... });
+
+// Disease scroller functionality
+const scrollerContent = document.querySelector('.scroller-content');
+const originalItems = document.querySelectorAll('.disease-item');
+
+// Clone all items twice to ensure continuous scrolling
+function setupInfiniteScroll() {
+    // First clone set - add to the end
+    originalItems.forEach(item => {
+        const clone = item.cloneNode(true);
+        scrollerContent.appendChild(clone);
+    });
+
+    // Second clone set - add to the end again
+    originalItems.forEach(item => {
+        const clone = item.cloneNode(true);
+        scrollerContent.appendChild(clone);
+    });
+}
+
+// Call the function to set up the infinite scroll
+setupInfiniteScroll();
+
+// Update the animation CSS to ensure continuous flow
+// This needs to be updated based on the number of original items
+const updateAnimation = () => {
+    const itemWidth = originalItems[0].offsetWidth;
+    const marginWidth = parseInt(window.getComputedStyle(originalItems[0]).marginLeft) +
+                        parseInt(window.getComputedStyle(originalItems[0]).marginRight);
+    const totalItemWidth = itemWidth + marginWidth;
+    const singleSetWidth = totalItemWidth * originalItems.length;
+
+    // Create and add a style element with the updated animation
+    const styleEl = document.createElement('style');
+    styleEl.innerHTML = `
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-${singleSetWidth}px);
+            }
+        }
+
+        .scroller-content {
+            animation: scroll ${originalItems.length * 3}s linear infinite;
+        }
+    `;
+    document.head.appendChild(styleEl);
+};
+
+// Call update animation after images have loaded
+window.addEventListener('load', updateAnimation);
+
+// Disease remedies data
+const diseaseRemedies = {
+    "Late Blight": [
+        {
+            title: "Fungicide Application",
+            description: "Apply copper-based fungicides or approved organic fungicides according to package instructions. Ensure complete leaf coverage."
+        },
+        {
+            title: "Plant Removal",
+            description: "Remove and destroy infected plants to prevent spread. Do not compost infected material."
+        },
+        {
+            title: "Crop Rotation",
+            description: "Avoid planting susceptible crops in the same location for at least 2 years."
+        }
+    ],
+    "Powdery Mildew": [
+        {
+            title: "Milk Spray",
+            description: "Mix 1 part milk to 9 parts water and spray on affected plants weekly as a natural fungicide."
+        },
+        {
+            title: "Baking Soda Solution",
+            description: "Mix 1 tablespoon baking soda with 1 teaspoon mild liquid soap and 1 gallon of water. Spray plants thoroughly."
+        },
+        {
+            title: "Proper Spacing",
+            description: "Ensure adequate spacing between plants to improve air circulation."
+        }
+    ],
+    "Apple Scab": [
+        {
+            title: "Fungicide Treatment",
+            description: "Apply sulfur or copper-based fungicides early in the growing season before symptoms appear."
+        },
+        {
+            title: "Sanitation",
+            description: "Remove and destroy fallen leaves to reduce fungal spores that overwinter."
+        },
+        {
+            title: "Resistant Varieties",
+            description: "Plant scab-resistant apple varieties for long-term management."
+        }
+    ],
+    "Black Spot": [
+        {
+            title: "Neem Oil",
+            description: "Apply neem oil solution every 7-14 days to affected plants."
+        },
+        {
+            title: "Proper Watering",
+            description: "Water at the base of plants and avoid overhead watering to keep foliage dry."
+        },
+        {
+            title: "Pruning",
+            description: "Remove and dispose of infected leaves and stems."
+        }
+    ],
+    "Leaf Rust": [
+        {
+            title: "Sulfur Spray",
+            description: "Apply sulfur-based fungicide at first sign of infection."
+        },
+        {
+            title: "Remove Infected Parts",
+            description: "Prune and destroy infected plant parts promptly."
+        },
+        {
+            title: "Companion Planting",
+            description: "Plant rust-repelling companions like garlic or chives nearby."
+        }
+    ],
+    "Bacterial Blight": [
+        {
+            title: "Copper Treatment",
+            description: "Apply copper-based bactericide early in the growing season."
+        },
+        {
+            title: "Avoid Wet Conditions",
+            description: "Avoid working with plants when they're wet to prevent spread."
+        },
+        {
+            title: "Tool Sanitation",
+            description: "Disinfect gardening tools with 10% bleach solution between plants."
+        }
+    ],
+    "Downy Mildew": [
+        {
+            title: "Potassium Bicarbonate",
+            description: "Apply potassium bicarbonate spray as a preventative measure."
+        },
+        {
+            title: "Improve Airflow",
+            description: "Thin plants and remove weeds to improve air circulation."
+        },
+        {
+            title: "Morning Watering",
+            description: "Water early in the day so foliage can dry before evening."
+        }
+    ],
+    "Anthracnose": [
+        {
+            title: "Copper Fungicide",
+            description: "Apply copper-based fungicide every 7-10 days during wet periods."
+        },
+        {
+            title: "Mulching",
+            description: "Apply fresh mulch to prevent splashing of spores from soil to plants."
+        },
+        {
+            title: "Prune Affected Areas",
+            description: "Remove and destroy infected plant parts, sterilizing tools between cuts."
+        }
+    ]
+};
+
+// Add click event to all disease items (original and cloned)
+document.addEventListener('click', function(event) {
+    // Check if the clicked element or its parent is a disease item
+    const diseaseItem = event.target.closest('.disease-item');
+    if (diseaseItem) {
+        const diseaseName = diseaseItem.getAttribute('data-disease');
+        const remedies = diseaseRemedies[diseaseName] || [];
+
+        // Update modal content
+        document.getElementById('disease-title').textContent = diseaseName;
+
+        const remediesContainer = document.getElementById('disease-remedies');
+        remediesContainer.innerHTML = '';
+
+        if (remedies.length > 0) {
+            remedies.forEach(remedy => {
+                const remedyEl = document.createElement('div');
+                remedyEl.className = 'remedy-item';
+                remedyEl.innerHTML = `
+                    <h5 class="remedy-title"><i class="fas fa-check-circle me-2" style="color: var(--primary-color);"></i>${remedy.title}</h5>
+                    <p>${remedy.description}</p>
+                `;
+                remediesContainer.appendChild(remedyEl);
+            });
+        } else {
+            remediesContainer.innerHTML = '<p>No specific remedies available for this disease.</p>';
+        }
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('remedyModal'));
+        modal.show();
+    }
+});
+
+// Optional: Pause animation on hover
+const scrollerContainer = document.querySelector('.scroller-container');
+scrollerContainer.addEventListener('mouseenter', () => {
+    document.querySelector('.scroller-content').style.animationPlayState = 'paused';
+});
+scrollerContainer.addEventListener('mouseleave', () => {
+    document.querySelector('.scroller-content').style.animationPlayState = 'running';
+});
+
+            // Browse button functionality
+            browseButton.addEventListener('click', function() {
+                imageUpload.click();
+            });
+
+            // Preview image before upload
+            imageUpload.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    handleFiles(file);
+                }
+            });
+
+            function handleFiles(file) {
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        previewImage.style.display = 'block';
+                        fileName.textContent = file.name;
+                        fileInfo.style.display = 'block';
+                        detectButton.style.display = 'inline-block';
+                        resultCard.style.display = 'none';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            // Change image button
+            changeImage.addEventListener('click', function() {
+                imageUpload.click();
+            });
+
+            // Scan again button
+            scanAgain.addEventListener('click', function() {
+                resultCard.style.display = 'none';
+                imageUpload.value = '';
+                previewImage.style.display = 'none';
+                fileInfo.style.display = 'none';
+                detectButton.style.display = 'none';
+            });
+
+            // Handle form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const file = imageUpload.files[0];
+                if (!file) {
+                    alert('Please select an image to upload');
+                    return;
+                }
+
+                // Show loading indicator
+                loadingIndicator.style.display = 'block';
+                resultCard.style.display = 'none';
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    loadingIndicator.style.display = 'none';
+
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                        return;
+                    }
+
+                    // Format the class name for display (replace underscores with spaces)
+                    const className = data.class;
+
+                    // Update result card
+                    resultTitle.textContent = className;
+
+                    // Update confidence information with animation
+                    const confidence = data.confidence || 0;
+                    confidenceText.textContent = `${confidence.toFixed(1)}%`;
+
+                    // Animate progress bar
+                    setTimeout(() => {
+                        confidenceBar.style.width = confidence + '%';
+                    }, 100);
+
+                    // Add detailed information based on disease
+                    if (className.toLowerCase().includes('healthy')) {
+                        resultDetails.innerHTML = '<strong>Good news!</strong> Your plant appears to be healthy. Continue with your current care routine.';
+                    } else {
+                        resultDetails.innerHTML = `<strong>Disease detected:</strong> ${className}. We recommend taking appropriate treatment measures for this condition. Consider consulting with a plant specialist for the best course of action.`;
+                    }
+
+                    resultCard.style.display = 'block';
+
+                    // Scroll to result
+                    resultCard.scrollIntoView({ behavior: 'smooth' });
+                })
+                .catch(error => {
+                    loadingIndicator.style.display = 'none';
+                    alert('Error: ' + error.message);
+                });
+            });
+
+            // Smooth scroll for navigation
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 70, // Offset for navbar
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
